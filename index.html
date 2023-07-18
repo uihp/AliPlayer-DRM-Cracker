@@ -1,0 +1,120 @@
+<!--<!DOCTYPE html>-->
+<!-- 解析的视频地址 -->
+<!-- https://tv.gxtv.cn/channel/channelivePlay_78dbfd44e6b74ab687204d2d8113cbf5.html  -->
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="DecryptTS.js"></script>
+
+    <style>
+        .bg{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .btns{
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<boby>
+
+<div class="bg">
+    <h1>【阿里云加密ts文件】解密</h1>
+
+    <div class="btns">
+        <div style="color:#999;font-size: 12px; margin-bottom: 20px;margin-left: 5px;">注：因不同网站AES的key是不同的.所以仅对某网站有效,具体请看代码。<br>若要解析其他网站，替换AES解密代码和key即可。
+            <br> 吾爱破解id：billsmiless <a href="https://www.jianshu.com/p/989f6d61fa81">使用说明</a> </div> 
+
+        <form action="/" method="post" enctype="multipart/form-data">
+            <input type="file" accept="*.mp2" name="file" id="tsfile">
+        </form>
+        <div style="font-size: 14px;margin-left: 5px;">
+            AES Key (Base64):
+            <input type="text" name="key" id = "key" value="jC0CLrqIi4m3Mut86OHvLw=="><br>
+        </div>
+        <button type="button" style = "margin-top: 20px;"onclick="readFile();">开始解密</button>
+    </div>
+</div>
+
+
+<script>
+
+    // 获取文件内容
+    function readFile() {
+
+        console.log('读取文件');
+
+        var file = document.getElementById("tsfile").files[0];
+
+        if( !file ) {
+            alert('请选择ts文件');
+            return;
+        }
+
+        let key = document.getElementById("key").value;
+        
+        if( !key) {
+            alert('请输入AES Key，可通过抓包获取');
+            return;
+        }
+
+        let fileReader = new FileReader();
+        fileReader.onload = function completed() {
+
+            var data = fileReader.result;
+
+            if( !data ) {
+                alert('读取ts文件失败');
+                return;
+            }
+
+            startDecrypt(data);
+
+            
+        }
+
+        fileReader.readAsArrayBuffer(file);
+    }
+
+    function startDecrypt(data) {
+        let key = document.getElementById("key").value;
+        var u8 = new Uint8Array(data);
+        let decryptData = decryptTS(u8,key);
+
+        bill_saveTs(decryptData);
+    }
+
+    function bill_saveTs(d) {
+
+        if( !d ) {
+            alert('解密ts失败');
+            return;
+        }
+
+        console.log('bill:保存解密后的ts文件');
+
+        let time = new Date().getTime()
+        let fileName = "video"+time.toString()+".ts", data = d.buffer;
+        var blob = new Blob([data],{
+            type: "arrayBuffer"
+        });
+        let url = window.URL.createObjectURL(blob);
+        let link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        alert('解密成功：'+fileName+'，即将保存');
+    }
+        
+</script>
+
+</boby>
+</html>
